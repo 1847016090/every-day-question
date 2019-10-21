@@ -1,6 +1,6 @@
 # JavaScript基础 #
 
-## 1.JavaScript规定了几种语言类型 ##
+## 1.JavaScript规定了几种语言类型(2019/10/21) ##
 
 1. 基本数据类型
     - Number

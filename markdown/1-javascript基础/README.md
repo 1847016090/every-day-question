@@ -144,3 +144,103 @@ Object.getOwnPropertySymbols(obj)   // Symbol(foo)]
  let s2 = Symbol("foo");
  Symbol.keyFor(s2) // undefined
 ```
+
+## 3.6 Symbol.hasInstance  ##
+> 当其他对象使用instanceof运算符，判断是否为该对象的实例时，会调用这个方法。比如，foo instanceof Foo在语言内部，实际调用的是Foo\[Symbol.hasInstance](foo)
+```
+  class Even {
+      [Symbol.hasInstance](obj) {
+          return obj instanceof Array
+      }
+  }
+
+  [1,2] instanceof new Even    // true
+
+  eg:
+  const Odd = {
+      [Symbol.hasInstance](obj) {
+          return Number(obj) % 2 === 0
+      }
+  }
+
+  1 instanceof Odd          //  false
+  2 instanceof Odd          //  true
+```
+
+## 3.7 Symbol.isConcatSpreadable 设置使数组是否展开 ##
+> isConcatSpreadable如果为false，则concat不会去展开，会true则会展开
+```
+let arr1 = [1,2]
+arr1[SymbolisConcatSpreadable] = false
+[4,5].concat(arr1)  //  [4, 5, Array(2)]
+```
+
+## 3.8 Symbol.speice ##
+> 有些类库是在基类的基础上修改的，那么子类使用继承的方法时，作者可能希望返回基类的实例，而不是子类的实例  
+```
+class T1 extends Promise {
+}
+
+class T2 extends Promise {
+  static get [Symbol.species]() {
+    return Promise;
+  }
+}
+
+new T1(r => r()).then(v => v) instanceof T1 // true
+new T2(r => r()).then(v => v) instanceof T2 // false
+```
+
+## 3.9 Symbol.iterator  ##
+> 对象的Symbol.iterator属性，指向该对象的默认遍历器方法。
+```
+const myIterable = {};
+myIterable[Symbol.iterator] = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+};
+
+[...myIterable] // [1, 2, 3]
+```
+> for of 循环
+```
+class Collection {
+  *[Symbol.iterator]() {
+    let i = 0;
+    while(this[i] !== undefined) {
+      yield this[i];
+      ++i;
+    }
+  }
+}
+
+let myCollection = new Collection();
+myCollection[0] = 1;
+myCollection[1] = 2;
+
+for(let value of myCollection) {
+  console.log(value);
+}
+// 1
+// 2
+```
+
+## Symbol总结 ##
+Symbol方法|调用时机
+-|-
+Symbol.hasInstance|instanceof
+Symbol.isConcatSpreadable|Array.prototype.concat()
+Symbol.species|创建衍生对象时，会使用该属性
+Symbol.match|str.match(myObject)
+Symbol.replace|String.prototype.replace
+Symbol.search|String.prototype.search
+Symbol.split|String.prototype.split
+Symbol.iterator|指向该对象的默认遍历器方法
+Symbol.toStringTag|Object.prototype.toString
+Symbol.toPrimitive|该对象被转为原始类型的值时，会调用这个方法，返回该对象对应的原始类型值
+
+Symbol.toPrimitive被调用时，会接受一个字符串参数，表示当前运算的模式，一共有三种模式。
+- Number：该场合需要转成数值
+- String：该场合需要转成字符串
+- Default：该场合可以转成数值，也可以转成字符串

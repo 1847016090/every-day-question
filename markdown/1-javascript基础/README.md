@@ -12,7 +12,11 @@
     - BigInt(Es10加入)
 
 2. 复杂数据类型
-    - Object
+    - Object  
+    1. Array 数组
+    2. Date 日期
+    3. RegExp 正则
+    4. Function 函数
 
 3. 验证数据类型之`typeof`字符中比较特殊的情况  
     ![typeof](./image/typeof.png)
@@ -297,3 +301,81 @@ console.log(obj === obj2); // false
 
 5. 引用传递和值传递
 > ECMAscript的所有函数是值传递。
+
+# 5. 基本类型对应的内置对象，以及他们之间的装箱拆箱操作 #
+基本类型的包装类型:  
+- Boolean
+- Number
+- String
+
+注意包装类型和原始类型的区别：  
+```
+true === new Boolean(true); // false
+123 === new Number(123); // false
+'ConardLi' === new String('ConardLi'); // false
+console.log(typeof new String('ConardLi')); // object
+console.log(typeof 'ConardLi'); // string
+```
+> 引用类型和包装类型的主要区别就是`对象的生存期`，使用new操作符创建的引用类型的实例，在执行流离开当前作用域之前都一直保存在内存中，而自基本类型则只存在于一行代码的执行瞬间，然后立即被销毁，这意味着我们不能在运行时为基本类型添加属性和方法。
+```
+var name = 'ConardLi'
+name.color = 'red';
+console.log(name.color); // undefined
+```
+
+装箱和拆箱：
+- 装箱转换：把基本类型转换为对应的包装类型
+
+- 拆箱操作：把引用类型转换为基本类型  
+### 原型数据不能添加属性和方法，那我们怎么去使用原型类型调用方法的呢？  ###  
+每当我们操作一个基础类型时，后台就会自动创建一个包装类型的对象，从而让我们能够调用一些方法和属性，例如下面的代码：  
+```
+var name = "ConardLi";
+var name2 = name.substring(2);
+```
+实际上发生了以下几个过程：
+
+- 创建一个String的包装类型实例
+- 在实例上调用substring方法
+- 销毁实例  
+
+也就是说，我们使用基本类型调用方法，就会自动进行装箱和拆箱操作，相同的，我们使用Number和Boolean类型时，也会发生这个过程。  
+
+从引用类型到基本类型的转换，也就是拆箱的过程中，会遵循ECMAScript规范规定的toPrimitive原则，一般会调用引用类型的valueOf和toString方法，你也可以直接重写toPeimitive方法。一般转换成不同类型的值遵循的原则不同，例如：
+- 引用类型转换为Number类型，先调用valueOf，再调用toString
+- 引用类型转换为String类型，先调用toString，再调用valueOf  
+
+若valueOf和toString都不存在，或者没有返回基本类型，则抛出TypeError异常。
+```
+const obj = {
+  valueOf: () => { console.log('valueOf'); return 123; },
+  toString: () => { console.log('toString'); return 'ConardLi'; },
+};
+
+console.log(obj - 1);   // valueOf   122
+
+console.log(`${obj}ConardLi`); // toString  ConardLiConardLi
+
+const obj2 = {
+  [Symbol.toPrimitive]: () => { console.log('toPrimitive'); return 123; },
+};
+
+console.log(obj2 - 1);   // valueOf   122
+
+const obj3 = {
+  valueOf: () => { console.log('valueOf'); return {}; },
+  toString: () => { console.log('toString'); return {}; },
+};
+
+console.log(obj3 - 1);  
+// valueOf  
+// toString
+// TypeError
+```
+
+除了程序中的自动拆箱和自动装箱，我们还可以手动进行拆箱和装箱操作。我们可以直接调用包装类型的valueOf或toString，实现拆箱操作：  
+```
+var num =new Number("123");  
+console.log( typeof num.valueOf() ); //number
+console.log( typeof num.toString() ); //string
+```

@@ -379,3 +379,22 @@ var num =new Number("123");
 console.log( typeof num.valueOf() ); //number
 console.log( typeof num.toString() ); //string
 ```
+
+# 7 null和undefined的区别 #
+## null ##
+表示被赋值过的对象，刻意把一个对象赋值为null，故意表示其为空，不应有值。
+所以对象的某个属性值为null是正常的，null转换为数值时值为0。
+## undefined ##
+表示“缺少值”，即此处应有一个值，但还没有定义，
+如果一个对象的某个属性值为undefined，这是不正常的，如obj.name=undefined，我们不应该这样写，应该直接delete obj.name。
+undefined转为数值时为NaN(非数字值的特殊值)
+JavaScript是一门动态类型语言，成员除了表示存在的空值外，还有可能根本就不存在（因为存不存在只在运行期才知道），这就是undefined的意义所在。对于JAVA这种强类型语言，如果有"undefined"这种情况，就会直接编译失败，所以在它不需要一个这样的类型。
+
+# 8.至少可以说出三种判断JavaScript数据类型的方式，以及他们的优缺点，如何准确的判断数组类型 #
+
+||typeof|instanceof|Object.prototype.toString.call()|jQuery.type
+-|-|-|-|-
+适用场景|原型类型|引用类型| ![](./image/判断类型.png)| 详情见Jquery源码
+不适用场景|引用类型(Array,Object,Reg,Date)|原型类型
+备注|适用String/Number/Boolean/Symbol/Undefined|1. [] instanceof Object // truefunction()  2. {}  instanceof Object // true|每一个引用类型都有toString方法，默认情况下，toString()方法被每个Object对象继承。如果此方法在自定义对象中未被覆盖，toString() 返回 "[object type]"，其中type是对象的类型。|判断基本类型是用的typeof，判断引用类型的时候使用的是使用Object.prototype.toString.call()
+
